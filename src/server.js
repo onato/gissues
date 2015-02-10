@@ -1,6 +1,8 @@
 // supervisor -e "js|html|css" server.js
 
 var express = require('express')
+	, cookieParser = require('cookie-parser')
+	, bodyParser = require('body-parser')
     , cluster = require('cluster')
     , http = require('http')
     , https = require('https')
@@ -15,17 +17,15 @@ if (!config.client_id || !config.client_secret)
 if (config.client_id === 'please specify client_id for OAuth here')
     throw new Error('config.json must be updated with OAuth credentials for the application. Get them at https://github.com/settings/applications/new.')
 
-var app = express.createServer();
+var app = express();
 var proxyOptions = undefined;
 
-app.configure(function() {
-    app.use(express.static(__dirname + '/public'));
-    app.use(express.bodyParser());
-    app.use(express.cookieParser());
-    app.set('view engine', 'ejs');
-    app.set('views', __dirname + '/views');
-    app.set("view options", { layout: false });
-});
+app.use(express.static(__dirname + '/public'));
+app.use(bodyParser.json());
+app.use(cookieParser());
+app.set('view engine', 'ejs');
+app.set('views', __dirname + '/views');
+app.set("view options", { layout: false });
 
 function processOAuthRequest(req, res) {
     var accessToken = req.param('code', undefined);
